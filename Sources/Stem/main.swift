@@ -268,7 +268,7 @@ func handlePlayPause() async -> CallTool.Result {
             return .init(content: [.text("Playing.")])
         }
     } catch {
-        return .init(content: [.text("Playback error: \(error.localizedDescription)")], isError: true)
+        return .init(content: [.text(playbackErrorMessage(error))], isError: true)
     }
 }
 
@@ -280,7 +280,7 @@ func handleSkipNext() async -> CallTool.Result {
         try? await Task.sleep(for: .milliseconds(200))
         return await handleGetNowPlaying()
     } catch {
-        return .init(content: [.text("Skip error: \(error.localizedDescription)")], isError: true)
+        return .init(content: [.text(playbackErrorMessage(error))], isError: true)
     }
 }
 
@@ -291,6 +291,22 @@ func handleSkipPrevious() async -> CallTool.Result {
         try? await Task.sleep(for: .milliseconds(200))
         return await handleGetNowPlaying()
     } catch {
-        return .init(content: [.text("Skip error: \(error.localizedDescription)")], isError: true)
+        return .init(content: [.text(playbackErrorMessage(error))], isError: true)
     }
+}
+
+// MARK: - Error Handling
+
+func playbackErrorMessage(_ error: Error) -> String {
+    let message = error.localizedDescription.lowercased()
+
+    if message.contains("subscription") || message.contains("not subscribed") || message.contains("offer") {
+        return "Playback requires an active Apple Music subscription. Catalog search and library access still work without one."
+    }
+
+    if message.contains("queue") || message.contains("empty") {
+        return "Nothing in the playback queue. Try playing a specific song first."
+    }
+
+    return "Playback error: \(error.localizedDescription)"
 }

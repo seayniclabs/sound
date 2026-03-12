@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stem — Apple Music MCP Server</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --green: #3fb950;
+            --red: #f85149;
+            --orange: #d29922;
+            --code-bg: #0d1117;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+        }
+
+        header h1 span {
+            color: var(--accent);
+        }
+
+        header .tagline {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        header .by {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 2.5rem 0 1rem;
+            color: var(--text);
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.5rem;
+            color: var(--text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        code {
+            font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            background: var(--surface);
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        pre {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            overflow-x: auto;
+            margin-bottom: 1.25rem;
+        }
+
+        pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 0.9em;
+            color: var(--text);
+        }
+
+        .prompt { color: var(--text-muted); }
+        .output { color: var(--green); }
+        .comment { color: var(--text-muted); font-style: italic; }
+
+        .steps {
+            list-style: none;
+            counter-reset: step;
+        }
+
+        .steps li {
+            counter-increment: step;
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .steps li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0.1rem;
+            width: 1.6rem;
+            height: 1.6rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 1.6rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .steps li strong {
+            color: var(--text);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .steps li p {
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        td code {
+            color: var(--accent);
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            margin-top: 0;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.15em 0.5em;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .badge-green { background: rgba(63, 185, 80, 0.15); color: var(--green); }
+        .badge-orange { background: rgba(210, 153, 34, 0.15); color: var(--orange); }
+        .badge-red { background: rgba(248, 81, 73, 0.15); color: var(--red); }
+
+        .is-isnt {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .is-isnt ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .is-isnt li {
+            padding: 0.3rem 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .is-isnt li::before {
+            display: inline-block;
+            width: 1.2em;
+            font-weight: 700;
+        }
+
+        .is li::before { content: "+"; color: var(--green); }
+        .isnt li::before { content: "-"; color: var(--red); }
+
+        .requirements {
+            list-style: none;
+        }
+
+        .requirements li {
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: var(--text-muted);
+        }
+
+        .requirements li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0.75rem;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 2rem 1rem; }
+            header h1 { font-size: 2rem; }
+            .is-isnt { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1><span>Stem</span></h1>
+    <p class="tagline">Apple Music for your AI tools.</p>
+    <p class="by">by Seaynic Labs</p>
+</header>
+
+<h2>What is Stem?</h2>
+<p>Stem is an MCP (Model Context Protocol) server that connects Apple Music to AI coding tools like Claude Code, Cursor, and any MCP-compatible client. Search the catalog, control playback, and manage playlists — all through natural language.</p>
+
+<div class="is-isnt">
+    <div class="card is">
+        <h3>What Stem is</h3>
+        <ul>
+            <li>A bridge between your AI tools and Apple Music</li>
+            <li>Native macOS — built with Swift and MusicKit</li>
+            <li>Zero-config auth — one system prompt, no API keys</li>
+            <li>Privacy-first — no telemetry, no data leaves your Mac</li>
+            <li>Free and open source</li>
+        </ul>
+    </div>
+    <div class="card isnt">
+        <h3>What Stem is not</h3>
+        <ul>
+            <li>A music player — playback goes through Music.app</li>
+            <li>A replacement for the Music app</li>
+            <li>Cross-platform — macOS only (MusicKit requirement)</li>
+            <li>An AI model — your AI tool provides the intelligence</li>
+            <li>A streaming service — requires your own Apple Music subscription</li>
+        </ul>
+    </div>
+</div>
+
+<h2>Requirements</h2>
+<ul class="requirements">
+    <li>macOS 14 (Sonoma) or later</li>
+    <li>Apple Music subscription (for playback; catalog search works without one)</li>
+    <li>An MCP-compatible AI tool (Claude Code, Cursor, etc.)</li>
+</ul>
+
+<h2>Quickstart</h2>
+<ol class="steps">
+    <li>
+        <strong>Install</strong>
+        <pre><code><span class="prompt">$</span> brew install seayniclabs/tap/stem</code></pre>
+        <p>Or download the installer from the <a href="#" style="color: var(--accent);">releases page</a>.</p>
+    </li>
+    <li>
+        <strong>Setup</strong>
+        <pre><code><span class="prompt">$</span> stem setup
+
+<span class="output">Stem — Apple Music for your AI tools</span>
+<span class="output">by Seaynic Labs</span>
+
+<span class="output">Requesting Apple Music access...</span>
+<span class="output">&#10003; Apple Music access granted</span></code></pre>
+        <p>A macOS system prompt will ask you to allow Apple Music access. Click Allow. This only happens once.</p>
+    </li>
+    <li>
+        <strong>Connect to your AI tool</strong>
+        <pre><code><span class="comment"># Claude Code</span>
+<span class="prompt">$</span> claude mcp add stem -- /usr/local/bin/stem serve
+
+<span class="comment"># Or add to ~/.claude.json manually:</span>
+{
+  "mcpServers": {
+    "stem": {
+      "command": "/usr/local/bin/stem",
+      "args": ["serve"]
+    }
+  }
+}</code></pre>
+    </li>
+    <li>
+        <strong>Use it</strong>
+        <p>Ask your AI tool anything about Apple Music:</p>
+        <pre><code><span class="comment">"Search Apple Music for Tycho"</span>
+<span class="comment">"What's currently playing?"</span>
+<span class="comment">"Skip to the next track"</span>
+<span class="comment">"Pause the music"</span></code></pre>
+    </li>
+</ol>
+
+<h2>Available Tools</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Tool</th>
+            <th>Description</th>
+            <th>Subscription</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>search_catalog</code></td>
+            <td>Search songs, albums, or artists</td>
+            <td><span class="badge badge-green">Not required</span></td>
+        </tr>
+        <tr>
+            <td><code>get_now_playing</code></td>
+            <td>Get the currently playing track</td>
+            <td><span class="badge badge-green">Not required</span></td>
+        </tr>
+        <tr>
+            <td><code>play_pause</code></td>
+            <td>Toggle play/pause</td>
+            <td><span class="badge badge-orange">Required</span></td>
+        </tr>
+        <tr>
+            <td><code>skip_next</code></td>
+            <td>Skip to next track</td>
+            <td><span class="badge badge-orange">Required</span></td>
+        </tr>
+        <tr>
+            <td><code>skip_previous</code></td>
+            <td>Go to previous track</td>
+            <td><span class="badge badge-orange">Required</span></td>
+        </tr>
+        <tr>
+            <td><code>ping</code></td>
+            <td>Check Stem status</td>
+            <td><span class="badge badge-green">Not required</span></td>
+        </tr>
+    </tbody>
+</table>
+<p>More tools coming soon: playlist creation, queue management, library access, and recently played.</p>
+
+<h2>How It Works</h2>
+<p>Stem uses Apple's MusicKit framework to communicate with Apple Music. When your AI tool sends a command (like "search for Radiohead"), it calls Stem over the MCP protocol. Stem translates that into a MusicKit API call, gets the results from Apple, and returns them to your AI tool.</p>
+
+<div class="card">
+<pre><code>Your AI tool  ──stdio──>  Stem  ──MusicKit──>  Apple Music
+(Claude, etc.)           (Swift)                 (catalog, library)
+                            │
+                            └──ApplicationMusicPlayer──>  Music.app
+                                                          (playback)</code></pre>
+</div>
+
+<p>All communication stays on your Mac. Stem doesn't phone home, collect analytics, or send data anywhere except directly to Apple's servers (the same way Music.app does).</p>
+
+<h2>Troubleshooting</h2>
+
+<h3>Apple Music access denied</h3>
+<p>Go to <strong>System Settings &rarr; Privacy &amp; Security &rarr; Media &amp; Apple Music</strong> and enable access for Stem. Then run <code>stem setup</code> again.</p>
+
+<h3>Playback doesn't work</h3>
+<p>Playback requires an active Apple Music subscription. If you have Apple Music, make sure you're signed in on this Mac. Catalog search works without a subscription.</p>
+
+<h3>MCP server not connecting</h3>
+<p>After adding Stem to your AI tool's MCP config, restart the tool. Claude Code and Cursor require a restart to pick up new MCP servers.</p>
+
+<footer>
+    <p>Stem is made by <a href="https://seayniclabs.com">Seaynic Labs</a>. Free and open source.</p>
+    <p>Apple Music and MusicKit are trademarks of Apple Inc.</p>
+</footer>
+
+</body>
+</html>
