@@ -39,7 +39,7 @@ No API keys. No browser auth flows. One command to install, one prompt to set up
 ### From source
 
 ```bash
-git clone https://github.com/cseay/stem.git
+git clone https://github.com/seayniclabs/stem.git
 cd stem
 swift build -c release
 ```
