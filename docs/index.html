@@ -281,6 +281,7 @@
 <body>
 
 <header>
+    <img src="assets/stem-logo.png" alt="Stem" width="120" style="border-radius: 16px; margin-bottom: 1rem;">
     <h1><span>Stem</span></h1>
     <p class="tagline">Apple Music for your AI tools.</p>
     <p class="by">by Seaynic Labs</p>
@@ -378,9 +379,19 @@
             <td><span class="badge badge-green">Not required</span></td>
         </tr>
         <tr>
-            <td><code>get_now_playing</code></td>
-            <td>Get the currently playing track</td>
+            <td><code>get_song_details</code></td>
+            <td>Full metadata for a song</td>
             <td><span class="badge badge-green">Not required</span></td>
+        </tr>
+        <tr>
+            <td><code>get_album_details</code></td>
+            <td>Album info with track listing</td>
+            <td><span class="badge badge-green">Not required</span></td>
+        </tr>
+        <tr>
+            <td><code>play_song</code></td>
+            <td>Play a specific song by ID</td>
+            <td><span class="badge badge-orange">Required</span></td>
         </tr>
         <tr>
             <td><code>play_pause</code></td>
@@ -388,23 +399,47 @@
             <td><span class="badge badge-orange">Required</span></td>
         </tr>
         <tr>
-            <td><code>skip_next</code></td>
-            <td>Skip to next track</td>
+            <td><code>skip_next</code> / <code>skip_previous</code></td>
+            <td>Track navigation</td>
             <td><span class="badge badge-orange">Required</span></td>
         </tr>
         <tr>
-            <td><code>skip_previous</code></td>
-            <td>Go to previous track</td>
+            <td><code>get_now_playing</code></td>
+            <td>Current track and playback state</td>
+            <td><span class="badge badge-green">Not required</span></td>
+        </tr>
+        <tr>
+            <td><code>get_queue</code> / <code>set_queue</code></td>
+            <td>Read or replace the playback queue</td>
             <td><span class="badge badge-orange">Required</span></td>
+        </tr>
+        <tr>
+            <td><code>get_library_playlists</code></td>
+            <td>List your playlists</td>
+            <td><span class="badge badge-green">Not required</span></td>
+        </tr>
+        <tr>
+            <td><code>get_recently_played</code></td>
+            <td>Recent listening history</td>
+            <td><span class="badge badge-green">Not required</span></td>
+        </tr>
+        <tr>
+            <td><code>create_playlist</code></td>
+            <td>Create a new playlist</td>
+            <td><span class="badge badge-green">Not required</span></td>
+        </tr>
+        <tr>
+            <td><code>add_to_playlist</code></td>
+            <td>Add songs to a playlist</td>
+            <td><span class="badge badge-green">Not required</span></td>
         </tr>
         <tr>
             <td><code>ping</code></td>
-            <td>Check Stem status</td>
+            <td>Health check</td>
             <td><span class="badge badge-green">Not required</span></td>
         </tr>
     </tbody>
 </table>
-<p>More tools coming soon: playlist creation, queue management, library access, and recently played.</p>
 
 <h2>How It Works</h2>
 <p>Stem uses Apple's MusicKit framework to communicate with Apple Music. When your AI tool sends a command (like "search for Radiohead"), it calls Stem over the MCP protocol. Stem translates that into a MusicKit API call, gets the results from Apple, and returns them to your AI tool.</p>

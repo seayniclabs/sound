@@ -1,6 +1,10 @@
-# Stem
+<p align="center">
+  <img src="docs/assets/stem-logo.png" alt="Stem" width="200">
+</p>
 
-**Apple Music for your AI tools.**
+<h1 align="center">Stem</h1>
+
+<p align="center"><strong>Apple Music for your AI tools.</strong></p>
 
 Stem is a native macOS [MCP server](https://modelcontextprotocol.io) that lets AI tools like Claude Code, Cursor, and Windsurf search, play, and manage Apple Music through natural language.
 
