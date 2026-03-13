@@ -36,6 +36,12 @@ No API keys. No browser auth flows. One command to install, one prompt to set up
 
 ## Install
 
+### Homebrew (recommended)
+
+```bash
+brew install seayniclabs/tap/stem
+```
+
 ### From source
 
 ```bash
@@ -51,7 +57,7 @@ The binary is at `.build/release/Stem`.
 Run the setup command to grant Apple Music access:
 
 ```bash
-.build/release/Stem setup
+stem setup
 ```
 
 This triggers the macOS permission prompt. You only need to do this once.
@@ -59,7 +65,7 @@ This triggers the macOS permission prompt. You only need to do this once.
 ### Add to Claude Code
 
 ```bash
-claude mcp add stem -- /path/to/Stem
+claude mcp add stem -- $(which stem)
 ```
 
 Or add manually to `~/.claude.json`:
@@ -68,7 +74,7 @@ Or add manually to `~/.claude.json`:
 {
   "mcpServers": {
     "stem": {
-      "command": "/path/to/Stem",
+      "command": "/path/to/stem",
       "args": []
     }
   }

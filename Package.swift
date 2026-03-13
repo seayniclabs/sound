@@ -11,9 +11,17 @@ let package = Package(
         .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", from: "0.11.0")
     ],
     targets: [
+        .target(
+            name: "StemCore",
+            dependencies: [
+                .product(name: "MCP", package: "swift-sdk")
+            ],
+            path: "Sources/StemCore"
+        ),
         .executableTarget(
             name: "Stem",
             dependencies: [
+                "StemCore",
                 .product(name: "MCP", package: "swift-sdk")
             ],
             path: "Sources/Stem",
@@ -26,6 +34,14 @@ let package = Package(
                     "-Xlinker", "Sources/Stem/Info.plist"
                 ])
             ]
+        ),
+        .testTarget(
+            name: "StemTests",
+            dependencies: [
+                "StemCore",
+                .product(name: "MCP", package: "swift-sdk")
+            ],
+            path: "Tests/StemTests"
         )
     ]
 )
