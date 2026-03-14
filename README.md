@@ -30,7 +30,7 @@ No API keys. No browser auth flows. One command to install, one prompt to set up
 
 ## Requirements
 
-- macOS 14+ (Sonoma or later)
+- macOS 14+ (Sonoma or later) on Apple Silicon
 - Apple Music subscription (for playback; catalog search works without one)
 - An MCP-compatible AI tool (Claude Code, Cursor, Windsurf, etc.)
 - For building from source: Xcode 16.3+ / Swift 6.1+
