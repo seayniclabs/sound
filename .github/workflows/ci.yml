@@ -21,5 +21,8 @@ jobs:
       - name: Build
         run: swift build -c release --disable-sandbox
 
+      - name: Sign binary with entitlements
+        run: codesign --force --sign - --entitlements Sources/Stem/Stem.entitlements .build/release/Stem
+
       - name: Test
         run: swift test --disable-sandbox
