@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>Stem</title>
+    <organization>com.seayniclabs</organization>
+    <domains enable_localSystem="true"/>
+    <options customize="never" require-scripts="true" rootVolumeOnly="true"/>
+    <choices-outline>
+        <line choice="com.seayniclabs.stem"/>
+    </choices-outline>
+    <choice id="com.seayniclabs.stem" visible="false">
+        <pkg-ref id="com.seayniclabs.stem"/>
+    </choice>
+    <pkg-ref id="com.seayniclabs.stem" version="0" onConclusion="none">Stem-component.pkg</pkg-ref>
+</installer-gui-script>

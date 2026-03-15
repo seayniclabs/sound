@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*'
 
 permissions:
   contents: write
@@ -21,16 +21,136 @@ jobs:
           swift-version: "6.1"
 
       - name: Build release binary
-        run: swift build -c release --disable-sandbox
+        run: swift build -c release --arch arm64 --disable-sandbox
 
-      - name: Sign binary with entitlements
-        run: codesign --force --sign - --entitlements Sources/Stem/Stem.entitlements .build/release/Stem
+      - name: Import signing certificates
+        env:
+          DEVELOPER_ID_APPLICATION_CERT_P12: ${{ secrets.DEVELOPER_ID_APPLICATION_CERT_P12 }}
+          DEVELOPER_ID_INSTALLER_CERT_P12: ${{ secrets.DEVELOPER_ID_INSTALLER_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 16)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          echo "$DEVELOPER_ID_APPLICATION_CERT_P12" | base64 --decode > /tmp/application.p12
+          security import /tmp/application.p12 -k "$KEYCHAIN_PATH" -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          echo "$DEVELOPER_ID_INSTALLER_CERT_P12" | base64 --decode > /tmp/installer.p12
+          security import /tmp/installer.p12 -k "$KEYCHAIN_PATH" -P "$CERT_PASSWORD" -T /usr/bin/productbuild
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          rm /tmp/application.p12 /tmp/installer.p12
 
-      - name: Prepare artifact
-        run: cp .build/release/Stem stem-macos-arm64
+      - name: Install provisioning profile
+        env:
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > embedded.provisionprofile
+
+      - name: Construct app wrapper
+        run: |
+          mkdir -p Stem.app/Contents/MacOS
+          cp .build/release/stem Stem.app/Contents/MacOS/stem
+          cp packaging/Info.plist Stem.app/Contents/Info.plist
+          cp embedded.provisionprofile Stem.app/Contents/embedded.provisionprofile
+
+      - name: Sign app wrapper
+        env:
+          NOTARYTOOL_TEAM_ID: ${{ secrets.NOTARYTOOL_TEAM_ID }}
+        run: |
+          codesign \
+            --sign "Developer ID Application: Seaynic Labs LLC ($NOTARYTOOL_TEAM_ID)" \
+            --options runtime \
+            --timestamp \
+            --entitlements packaging/Stem.entitlements \
+            --force \
+            --verbose \
+            Stem.app
+          codesign --verify --deep --strict --verbose=2 Stem.app
+
+      - name: Notarize app
+        env:
+          NOTARYTOOL_APPLE_ID: ${{ secrets.NOTARYTOOL_APPLE_ID }}
+          NOTARYTOOL_TEAM_ID: ${{ secrets.NOTARYTOOL_TEAM_ID }}
+          NOTARYTOOL_APP_PASSWORD: ${{ secrets.NOTARYTOOL_APP_PASSWORD }}
+        run: |
+          ditto -c -k --keepParent Stem.app Stem.zip
+          xcrun notarytool submit Stem.zip \
+            --apple-id "$NOTARYTOOL_APPLE_ID" \
+            --team-id "$NOTARYTOOL_TEAM_ID" \
+            --password "$NOTARYTOOL_APP_PASSWORD" \
+            --wait --output-format json | tee notarization-result.json
+          STATUS=$(python3 -c "import json,sys; print(json.load(open('notarization-result.json')).get('status',''))")
+          if [ "$STATUS" != "Accepted" ]; then
+            SUBMISSION_ID=$(python3 -c "import json,sys; print(json.load(open('notarization-result.json')).get('id',''))")
+            xcrun notarytool log "$SUBMISSION_ID" \
+              --apple-id "$NOTARYTOOL_APPLE_ID" \
+              --team-id "$NOTARYTOOL_TEAM_ID" \
+              --password "$NOTARYTOOL_APP_PASSWORD"
+            exit 1
+          fi
+          xcrun stapler staple Stem.app
+          xcrun stapler validate Stem.app
+
+      - name: Build .pkg installer
+        env:
+          NOTARYTOOL_TEAM_ID: ${{ secrets.NOTARYTOOL_TEAM_ID }}
+        run: |
+          mkdir -p packaging/scripts
+          cat > packaging/scripts/postinstall << 'SCRIPT'
+          #!/bin/bash
+          mkdir -p /usr/local/bin
+          ln -sf /Applications/Stem.app/Contents/MacOS/stem /usr/local/bin/stem
+          exit 0
+          SCRIPT
+          chmod +x packaging/scripts/postinstall
+          VERSION=$(cat packaging/version.txt)
+          pkgbuild \
+            --component Stem.app \
+            --install-location /Applications \
+            --scripts packaging/scripts \
+            --identifier com.seayniclabs.stem \
+            --version "$VERSION" \
+            Stem-component.pkg
+          productbuild \
+            --distribution packaging/Distribution.xml \
+            --package-path . \
+            --sign "Developer ID Installer: Seaynic Labs LLC ($NOTARYTOOL_TEAM_ID)" \
+            Stem.pkg
+
+      - name: Notarize .pkg
+        env:
+          NOTARYTOOL_APPLE_ID: ${{ secrets.NOTARYTOOL_APPLE_ID }}
+          NOTARYTOOL_TEAM_ID: ${{ secrets.NOTARYTOOL_TEAM_ID }}
+          NOTARYTOOL_APP_PASSWORD: ${{ secrets.NOTARYTOOL_APP_PASSWORD }}
+        run: |
+          xcrun notarytool submit Stem.pkg \
+            --apple-id "$NOTARYTOOL_APPLE_ID" \
+            --team-id "$NOTARYTOOL_TEAM_ID" \
+            --password "$NOTARYTOOL_APP_PASSWORD" \
+            --wait --output-format json | tee pkg-result.json
+          STATUS=$(python3 -c "import json,sys; print(json.load(open('pkg-result.json')).get('status',''))")
+          if [ "$STATUS" != "Accepted" ]; then exit 1; fi
+          xcrun stapler staple Stem.pkg
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: stem-macos-arm64
-          generate_release_notes: true
+          name: "Stem ${{ github.ref_name }}"
+          body: |
+            ## Install
+
+            **Homebrew (recommended):**
+            ```bash
+            brew install seayniclabs/tap/stem
+            ```
+
+            **Direct download:**
+            Download `Stem.pkg` below and double-click to install.
+            Then run `stem setup` in Terminal to grant Apple Music access.
+
+            **Full documentation:** [seayniclabs.com/stem](https://seayniclabs.com/stem)
+          files: |
+            Stem.pkg
+            .build/release/stem
