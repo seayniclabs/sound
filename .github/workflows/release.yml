@@ -42,25 +42,18 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           rm /tmp/application.p12 /tmp/installer.p12
 
-      - name: Install provisioning profile
-        env:
-          PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
-        run: |
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > embedded.provisionprofile
-
       - name: Construct app wrapper
         run: |
           mkdir -p Stem.app/Contents/MacOS
           cp .build/release/stem Stem.app/Contents/MacOS/stem
           cp packaging/Info.plist Stem.app/Contents/Info.plist
-          cp embedded.provisionprofile Stem.app/Contents/embedded.provisionprofile
 
       - name: Sign app wrapper
         env:
           NOTARYTOOL_TEAM_ID: ${{ secrets.NOTARYTOOL_TEAM_ID }}
         run: |
           codesign \
-            --sign "Developer ID Application: Seaynic Labs LLC ($NOTARYTOOL_TEAM_ID)" \
+            --sign "Developer ID Application: Charles Seay ($NOTARYTOOL_TEAM_ID)" \
             --options runtime \
             --timestamp \
             --entitlements packaging/Stem.entitlements \
@@ -116,7 +109,7 @@ jobs:
           productbuild \
             --distribution packaging/Distribution.xml \
             --package-path . \
-            --sign "Developer ID Installer: Seaynic Labs LLC ($NOTARYTOOL_TEAM_ID)" \
+            --sign "Developer ID Installer: Charles Seay ($NOTARYTOOL_TEAM_ID)" \
             Stem.pkg
 
       - name: Notarize .pkg
