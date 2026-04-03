@@ -1,14 +1,14 @@
 import Foundation
 import MCP
 import MusicKit
-import StemCore
+import SoundCore
 
 // MARK: - Entry Point
 
 let args = CommandLine.arguments
 
 func log(_ msg: String) {
-    FileHandle.standardError.write(Data("[stem] \(msg)\n".utf8))
+    FileHandle.standardError.write(Data("[sound] \(msg)\n".utf8))
 }
 
 if args.contains("setup") {
@@ -30,7 +30,7 @@ func runSetup() async {
 
     print("""
 
-    Stem — Apple Music for your AI tools
+    Sound — Apple Music for your AI tools
     by Seaynic Labs
 
     """)
@@ -56,15 +56,15 @@ func runSetup() async {
     }
 
     print("""
-    Add Stem to Claude Code:
+    Add Sound to Claude Code:
 
-      claude mcp add stem -- \(binary) serve
+      claude mcp add sound -- \(binary) serve
 
     Or add manually to ~/.claude.json:
 
       {
         "mcpServers": {
-          "stem": {
+          "sound": {
             "command": "\(binary)",
             "args": ["serve"]
           }
@@ -80,11 +80,11 @@ func runSetup() async {
 func startServer() async throws {
     // Skip MusicKit auth check — it hangs in non-interactive/headless contexts.
     // MusicKit API calls will fail individually if not authorized.
-    // Run 'stem setup' in a terminal first to grant access.
+    // Run 'sound setup' in a terminal first to grant access.
 
     let server = Server(
-        name: Stem.serverName,
-        version: Stem.serverVersion,
+        name: Sound.serverName,
+        version: Sound.serverVersion,
         capabilities: Server.Capabilities(
             tools: .init()
         )
@@ -92,14 +92,14 @@ func startServer() async throws {
 
     // Register tool list handler
     await server.withMethodHandler(ListTools.self) { _ in
-        .init(tools: Stem.tools)
+        .init(tools: Sound.tools)
     }
 
     // Register tool call handler
     await server.withMethodHandler(CallTool.self) { params in
         switch params.name {
         case "ping":
-            return .init(content: [.text(Stem.pingResponse)])
+            return .init(content: [.text(Sound.pingResponse)])
 
         case "search_catalog":
             do {

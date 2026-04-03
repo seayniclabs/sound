@@ -44,9 +44,9 @@ jobs:
 
       - name: Construct app wrapper
         run: |
-          mkdir -p Stem.app/Contents/MacOS
-          cp .build/release/stem Stem.app/Contents/MacOS/stem
-          cp packaging/Info.plist Stem.app/Contents/Info.plist
+          mkdir -p Sound.app/Contents/MacOS
+          cp .build/release/Sound Sound.app/Contents/MacOS/sound
+          cp packaging/Info.plist Sound.app/Contents/Info.plist
 
       - name: Sign app wrapper
         env:
@@ -56,11 +56,11 @@ jobs:
             --sign "Developer ID Application: Charles Seay ($NOTARYTOOL_TEAM_ID)" \
             --options runtime \
             --timestamp \
-            --entitlements packaging/Stem.entitlements \
+            --entitlements packaging/Sound.entitlements \
             --force \
             --verbose \
-            Stem.app
-          codesign --verify --deep --strict --verbose=2 Stem.app
+            Sound.app
+          codesign --verify --deep --strict --verbose=2 Sound.app
 
       - name: Notarize app
         env:
@@ -68,8 +68,8 @@ jobs:
           NOTARYTOOL_TEAM_ID: ${{ secrets.NOTARYTOOL_TEAM_ID }}
           NOTARYTOOL_APP_PASSWORD: ${{ secrets.NOTARYTOOL_APP_PASSWORD }}
         run: |
-          ditto -c -k --keepParent Stem.app Stem.zip
-          xcrun notarytool submit Stem.zip \
+          ditto -c -k --keepParent Sound.app Sound.zip
+          xcrun notarytool submit Sound.zip \
             --apple-id "$NOTARYTOOL_APPLE_ID" \
             --team-id "$NOTARYTOOL_TEAM_ID" \
             --password "$NOTARYTOOL_APP_PASSWORD" \
@@ -83,8 +83,8 @@ jobs:
               --password "$NOTARYTOOL_APP_PASSWORD"
             exit 1
           fi
-          xcrun stapler staple Stem.app
-          xcrun stapler validate Stem.app
+          xcrun stapler staple Sound.app
+          xcrun stapler validate Sound.app
 
       - name: Build .pkg installer
         env:
@@ -94,23 +94,23 @@ jobs:
           cat > packaging/scripts/postinstall << 'SCRIPT'
           #!/bin/bash
           mkdir -p /usr/local/bin
-          ln -sf /Applications/Stem.app/Contents/MacOS/stem /usr/local/bin/stem
+          ln -sf /Applications/Sound.app/Contents/MacOS/sound /usr/local/bin/sound
           exit 0
           SCRIPT
           chmod +x packaging/scripts/postinstall
           VERSION=$(cat packaging/version.txt)
           pkgbuild \
-            --component Stem.app \
+            --component Sound.app \
             --install-location /Applications \
             --scripts packaging/scripts \
-            --identifier com.seayniclabs.stem \
+            --identifier com.seayniclabs.sound \
             --version "$VERSION" \
-            Stem-component.pkg
+            Sound-component.pkg
           productbuild \
             --distribution packaging/Distribution.xml \
             --package-path . \
             --sign "Developer ID Installer: Charles Seay ($NOTARYTOOL_TEAM_ID)" \
-            Stem.pkg
+            Sound.pkg
 
       - name: Notarize .pkg
         env:
@@ -118,32 +118,32 @@ jobs:
           NOTARYTOOL_TEAM_ID: ${{ secrets.NOTARYTOOL_TEAM_ID }}
           NOTARYTOOL_APP_PASSWORD: ${{ secrets.NOTARYTOOL_APP_PASSWORD }}
         run: |
-          xcrun notarytool submit Stem.pkg \
+          xcrun notarytool submit Sound.pkg \
             --apple-id "$NOTARYTOOL_APPLE_ID" \
             --team-id "$NOTARYTOOL_TEAM_ID" \
             --password "$NOTARYTOOL_APP_PASSWORD" \
             --wait --output-format json | tee pkg-result.json
           STATUS=$(python3 -c "import json,sys; print(json.load(open('pkg-result.json')).get('status',''))")
           if [ "$STATUS" != "Accepted" ]; then exit 1; fi
-          xcrun stapler staple Stem.pkg
+          xcrun stapler staple Sound.pkg
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "Stem ${{ github.ref_name }}"
+          name: "Sound ${{ github.ref_name }}"
           body: |
             ## Install
 
             **Homebrew (recommended):**
             ```bash
-            brew install seayniclabs/tap/stem
+            brew install seayniclabs/tap/sound
             ```
 
             **Direct download:**
-            Download `Stem.pkg` below and double-click to install.
-            Then run `stem setup` in Terminal to grant Apple Music access.
+            Download `Sound.pkg` below and double-click to install.
+            Then run `sound setup` in Terminal to grant Apple Music access.
 
-            **Full documentation:** [seayniclabs.com/stem](https://seayniclabs.com/stem)
+            **Full documentation:** [seayniclabs.com/sound](https://seayniclabs.com/sound)
           files: |
-            Stem.pkg
-            .build/release/stem
+            Sound.pkg
+            .build/release/Sound

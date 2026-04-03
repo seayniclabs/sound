@@ -3,24 +3,24 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>com.seayniclabs.stem</string>
+    <string>com.seayniclabs.sound</string>
     <key>CFBundleName</key>
-    <string>Stem</string>
+    <string>Sound</string>
     <key>CFBundleDisplayName</key>
-    <string>Stem</string>
+    <string>Sound</string>
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0.0</string>
     <key>CFBundleExecutable</key>
-    <string>stem</string>
+    <string>sound</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>NSAppleEventsUsageDescription</key>
-    <string>Stem uses Apple Events to control Music.app playback.</string>
+    <string>Sound uses Apple Events to control Music.app playback.</string>
     <key>NSAppleMusicUsageDescription</key>
-    <string>Stem uses Apple Music to search the catalog, manage playlists, and control playback from your AI tools.</string>
+    <string>Sound uses Apple Music to search the catalog, manage playlists, and control playback from your AI tools.</string>
 </dict>
 </plist>

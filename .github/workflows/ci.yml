@@ -22,7 +22,7 @@ jobs:
         run: swift build -c release --disable-sandbox
 
       - name: Sign binary with entitlements
-        run: codesign --force --sign - --entitlements Sources/Stem/Stem.entitlements .build/release/Stem
+        run: codesign --force --sign - --entitlements Sources/Sound/Sound.entitlements .build/release/Sound
 
       - name: Test
         run: swift test --disable-sandbox

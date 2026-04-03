@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="docs/assets/stem-logo.png" alt="Stem" width="200">
+  <img src="docs/assets/sound-logo.png" alt="Sound" width="200">
 </p>
 
-<h1 align="center">Stem</h1>
+<h1 align="center">Sound</h1>
 
 <p align="center"><strong>Apple Music for your AI tools.</strong></p>
 
-Stem is a native macOS [MCP server](https://modelcontextprotocol.io) that lets AI tools like Claude Code, Cursor, and Windsurf search, play, and manage Apple Music through natural language.
+Sound is a native macOS [MCP server](https://modelcontextprotocol.io) that lets AI tools like Claude Code, Cursor, and Windsurf search, play, and manage Apple Music through natural language.
 
 No API keys. No browser auth flows. One command to install, one prompt to set up.
 
@@ -40,26 +40,26 @@ No API keys. No browser auth flows. One command to install, one prompt to set up
 ### Homebrew (recommended)
 
 ```bash
-brew install seayniclabs/tap/stem
+brew install seayniclabs/tap/sound
 ```
 
 ### From source
 
 ```bash
-git clone https://github.com/seayniclabs/stem.git
-cd stem
+git clone https://github.com/seayniclabs/sound.git
+cd sound
 swift build -c release
-codesign --force --sign - --entitlements Sources/Stem/Stem.entitlements .build/release/Stem
+codesign --force --sign - --entitlements Sources/Sound/Sound.entitlements .build/release/Sound
 ```
 
-The binary is at `.build/release/Stem`.
+The binary is at `.build/release/Sound`.
 
 ### First-time setup
 
 Run the setup command to grant Apple Music access:
 
 ```bash
-stem setup
+sound setup
 ```
 
 This triggers the macOS permission prompt. You only need to do this once.
@@ -67,7 +67,7 @@ This triggers the macOS permission prompt. You only need to do this once.
 ### Add to Claude Code
 
 ```bash
-claude mcp add stem -- $(which stem)
+claude mcp add sound -- $(which sound)
 ```
 
 Or add manually to `~/.claude.json`:
@@ -75,8 +75,8 @@ Or add manually to `~/.claude.json`:
 ```json
 {
   "mcpServers": {
-    "stem": {
-      "command": "/path/to/stem",
+    "sound": {
+      "command": "/path/to/sound",
       "args": ["serve"]
     }
   }
@@ -95,14 +95,14 @@ Once connected, just talk to your AI tool:
 
 ## How it works
 
-Stem uses Apple's [MusicKit](https://developer.apple.com/musickit/) framework to interact with Apple Music natively on macOS. It communicates with AI tools over stdio using the [Model Context Protocol](https://modelcontextprotocol.io) (JSON-RPC).
+Sound uses Apple's [MusicKit](https://developer.apple.com/musickit/) framework to interact with Apple Music natively on macOS. It communicates with AI tools over stdio using the [Model Context Protocol](https://modelcontextprotocol.io) (JSON-RPC).
 
 ```
-AI Tool  --stdio/JSON-RPC-->  Stem  --MusicKit-->  Apple Music
-                                    --ApplicationMusicPlayer-->  Music.app
+AI Tool  --stdio/JSON-RPC-->  Sound  --MusicKit-->  Apple Music
+                                     --ApplicationMusicPlayer-->  Music.app
 ```
 
-Auth is handled by macOS — the binary has an embedded bundle identifier (`com.seayniclabs.stem`) and the MusicKit entitlement. Users just click "Allow" once when prompted. No tokens, no refresh logic, no config files.
+Auth is handled by macOS — the binary has an embedded bundle identifier (`com.seayniclabs.sound`) and the MusicKit entitlement. Users just click "Allow" once when prompted. No tokens, no refresh logic, no config files.
 
 ## Building
 
@@ -111,7 +111,7 @@ swift build           # debug build
 swift build -c release  # release build
 ```
 
-Stem requires Swift 6.1+ and targets macOS 14+.
+Sound requires Swift 6.1+ and targets macOS 14+.
 
 ## License
 

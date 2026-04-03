@@ -1,6 +1,6 @@
 import Testing
 import MCP
-@testable import StemCore
+@testable import SoundCore
 
 // MARK: - Server Creation
 
@@ -10,13 +10,13 @@ struct ServerCreationTests {
     @Test("Server initializes with correct name and version")
     func serverNameAndVersion() async {
         let server = Server(
-            name: Stem.serverName,
-            version: Stem.serverVersion,
+            name: Sound.serverName,
+            version: Sound.serverVersion,
             capabilities: Server.Capabilities(tools: .init())
         )
 
-        #expect(server.name == "stem")
-        #expect(server.version == "0.1.1")
+        #expect(server.name == "sound")
+        #expect(server.version == "1.0.0")
     }
 
     @Test("Server declares tools capability")
@@ -35,7 +35,7 @@ struct ToolRegistrationTests {
 
     @Test("All 15 tools are defined")
     func toolCount() {
-        #expect(Stem.tools.count == 15)
+        #expect(Sound.tools.count == 15)
     }
 
     @Test("Tool names match expected set")
@@ -58,13 +58,13 @@ struct ToolRegistrationTests {
             "ping"
         ]
 
-        let actual = Set(Stem.toolNames)
+        let actual = Set(Sound.toolNames)
         #expect(actual == expected)
     }
 
     @Test("Every tool has a description")
     func allToolsHaveDescriptions() {
-        for tool in Stem.tools {
+        for tool in Sound.tools {
             #expect(tool.description != nil, "Tool '\(tool.name)' is missing a description")
             #expect(tool.description?.isEmpty == false, "Tool '\(tool.name)' has an empty description")
         }
@@ -72,7 +72,7 @@ struct ToolRegistrationTests {
 
     @Test("Every tool has an object input schema")
     func allToolsHaveObjectSchemas() {
-        for tool in Stem.tools {
+        for tool in Sound.tools {
             if case .object(let schema) = tool.inputSchema {
                 // Should have "type": "object"
                 if case .string(let typeValue) = schema["type"] {
@@ -91,7 +91,7 @@ struct ToolRegistrationTests {
 
     @Test("No duplicate tool names")
     func noDuplicateNames() {
-        let names = Stem.toolNames
+        let names = Sound.toolNames
         let unique = Set(names)
         #expect(names.count == unique.count, "Duplicate tool names found")
     }
@@ -104,7 +104,7 @@ struct RequiredParameterTests {
 
     /// Helper to extract the "required" array from a tool's inputSchema
     private func requiredParams(for toolName: String) -> [String] {
-        guard let tool = Stem.tools.first(where: { $0.name == toolName }),
+        guard let tool = Sound.tools.first(where: { $0.name == toolName }),
               case .object(let schema) = tool.inputSchema,
               case .array(let required) = schema["required"] else {
             return []
@@ -176,19 +176,19 @@ struct VersionTests {
 
     @Test("Ping response includes current version")
     func pingResponseIncludesVersion() {
-        let response = Stem.pingResponse
-        #expect(response.contains(Stem.serverVersion))
-        #expect(response.contains("Stem v\(Stem.serverVersion)"))
+        let response = Sound.pingResponse
+        #expect(response.contains(Sound.serverVersion))
+        #expect(response.contains("Sound v\(Sound.serverVersion)"))
     }
 
-    @Test("Server name is 'stem'")
+    @Test("Server name is 'sound'")
     func serverNameCorrect() {
-        #expect(Stem.serverName == "stem")
+        #expect(Sound.serverName == "sound")
     }
 
     @Test("Version follows semver format")
     func versionFormat() {
-        let parts = Stem.serverVersion.split(separator: ".")
+        let parts = Sound.serverVersion.split(separator: ".")
         #expect(parts.count == 3, "Version should have major.minor.patch format")
         for part in parts {
             #expect(Int(part) != nil, "Version component '\(part)' should be numeric")
@@ -203,7 +203,7 @@ struct SchemaDetailTests {
 
     /// Helper to get properties dict from a tool
     private func properties(for toolName: String) -> [String: Value]? {
-        guard let tool = Stem.tools.first(where: { $0.name == toolName }),
+        guard let tool = Sound.tools.first(where: { $0.name == toolName }),
               case .object(let schema) = tool.inputSchema,
               case .object(let props) = schema["properties"] else {
             return nil

@@ -3,7 +3,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Stem",
+    name: "Sound",
     platforms: [
         .macOS(.v14)
     ],
@@ -12,36 +12,36 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "StemCore",
+            name: "SoundCore",
             dependencies: [
                 .product(name: "MCP", package: "swift-sdk")
             ],
-            path: "Sources/StemCore"
+            path: "Sources/SoundCore"
         ),
         .executableTarget(
-            name: "Stem",
+            name: "Sound",
             dependencies: [
-                "StemCore",
+                "SoundCore",
                 .product(name: "MCP", package: "swift-sdk")
             ],
-            path: "Sources/Stem",
-            exclude: ["Stem.entitlements", "Info.plist"],
+            path: "Sources/Sound",
+            exclude: ["Sound.entitlements", "Info.plist"],
             linkerSettings: [
                 .unsafeFlags([
                     "-Xlinker", "-sectcreate",
                     "-Xlinker", "__TEXT",
                     "-Xlinker", "__info_plist",
-                    "-Xlinker", "Sources/Stem/Info.plist"
+                    "-Xlinker", "Sources/Sound/Info.plist"
                 ])
             ]
         ),
         .testTarget(
-            name: "StemTests",
+            name: "SoundTests",
             dependencies: [
-                "StemCore",
+                "SoundCore",
                 .product(name: "MCP", package: "swift-sdk")
             ],
-            path: "Tests/StemTests"
+            path: "Tests/SoundTests"
         )
     ]
 )

@@ -1,7 +1,7 @@
 import Foundation
 import Testing
 import MCP
-@testable import StemCore
+@testable import SoundCore
 
 // MARK: - Tool Handler Routing
 
@@ -13,16 +13,16 @@ struct ToolHandlerRoutingTests {
     /// but has no case in the handler, it falls through to "Unknown tool".
     @Test("Every registered tool name resolves to a tool definition")
     func allToolNamesResolvable() {
-        for name in Stem.toolNames {
-            let tool = Stem.tools.first(where: { $0.name == name })
+        for name in Sound.toolNames {
+            let tool = Sound.tools.first(where: { $0.name == name })
             #expect(tool != nil, "Tool '\(name)' is registered but has no matching definition")
         }
     }
 
     @Test("Tool lookup by name returns correct tool")
     func toolLookupByName() {
-        for tool in Stem.tools {
-            let found = Stem.tools.first(where: { $0.name == tool.name })
+        for tool in Sound.tools {
+            let found = Sound.tools.first(where: { $0.name == tool.name })
             #expect(found?.name == tool.name)
             #expect(found?.description == tool.description)
         }
@@ -32,7 +32,7 @@ struct ToolHandlerRoutingTests {
     func unknownToolNames() {
         let fakeNames = ["play_album", "shuffle", "repeat", "volume_up", "like_song", ""]
         for name in fakeNames {
-            let found = Stem.tools.first(where: { $0.name == name })
+            let found = Sound.tools.first(where: { $0.name == name })
             #expect(found == nil, "Fake tool name '\(name)' should not match any registered tool")
         }
     }
@@ -40,7 +40,7 @@ struct ToolHandlerRoutingTests {
     @Test("Tool names use snake_case convention")
     func toolNamesAreSnakeCase() {
         let snakeCasePattern = /^[a-z][a-z0-9]*(_[a-z0-9]+)*$/
-        for name in Stem.toolNames {
+        for name in Sound.toolNames {
             #expect(name.wholeMatch(of: snakeCasePattern) != nil,
                     "Tool '\(name)' does not follow snake_case convention")
         }
@@ -498,28 +498,28 @@ struct PingResponseFormatTests {
 
     @Test("Ping response is a non-empty string")
     func pingResponseNonEmpty() {
-        #expect(!Stem.pingResponse.isEmpty)
+        #expect(!Sound.pingResponse.isEmpty)
     }
 
     @Test("Ping response contains server name")
     func pingResponseContainsName() {
-        #expect(Stem.pingResponse.contains("Stem"))
+        #expect(Sound.pingResponse.contains("Sound"))
     }
 
     @Test("Ping response contains version number")
     func pingResponseContainsVersion() {
-        #expect(Stem.pingResponse.contains(Stem.serverVersion))
+        #expect(Sound.pingResponse.contains(Sound.serverVersion))
     }
 
     @Test("Ping response mentions authorization status")
     func pingResponseMentionsAuth() {
-        #expect(Stem.pingResponse.contains("authorized"))
+        #expect(Sound.pingResponse.contains("authorized"))
     }
 
     @Test("Ping response follows expected format")
     func pingResponseFormat() {
-        let expected = "Stem v\(Stem.serverVersion) is running. Apple Music is authorized."
-        #expect(Stem.pingResponse == expected)
+        let expected = "Sound v\(Sound.serverVersion) is running. Apple Music is authorized."
+        #expect(Sound.pingResponse == expected)
     }
 }
 
@@ -530,7 +530,7 @@ struct ToolDescriptionQualityTests {
 
     @Test("All descriptions start with a verb or noun phrase")
     func descriptionsAreActionable() {
-        for tool in Stem.tools {
+        for tool in Sound.tools {
             guard let desc = tool.description else {
                 Issue.record("Tool '\(tool.name)' has no description")
                 continue
@@ -545,7 +545,7 @@ struct ToolDescriptionQualityTests {
 
     @Test("No descriptions exceed 100 characters")
     func descriptionsAreReasonablyShort() {
-        for tool in Stem.tools {
+        for tool in Sound.tools {
             if let desc = tool.description {
                 #expect(desc.count <= 100,
                         "Tool '\(tool.name)' description is \(desc.count) chars — keep under 100")
@@ -557,7 +557,7 @@ struct ToolDescriptionQualityTests {
     func playbackToolDescriptionsRelevant() {
         let playbackTools = ["play_pause", "skip_next", "skip_previous", "get_now_playing", "play_song"]
         for name in playbackTools {
-            guard let tool = Stem.tools.first(where: { $0.name == name }),
+            guard let tool = Sound.tools.first(where: { $0.name == name }),
                   let desc = tool.description else { continue }
             let lower = desc.lowercased()
             let mentionsMusic = lower.contains("apple music") || lower.contains("track") ||
@@ -575,7 +575,7 @@ struct SchemaParameterConsistencyTests {
 
     /// Helper: extract property names from a tool schema
     private func propertyNames(for toolName: String) -> Set<String> {
-        guard let tool = Stem.tools.first(where: { $0.name == toolName }),
+        guard let tool = Sound.tools.first(where: { $0.name == toolName }),
               case .object(let schema) = tool.inputSchema,
               case .object(let props) = schema["properties"] else {
             return []
@@ -585,7 +585,7 @@ struct SchemaParameterConsistencyTests {
 
     /// Helper: extract required param names from a tool schema
     private func requiredNames(for toolName: String) -> Set<String> {
-        guard let tool = Stem.tools.first(where: { $0.name == toolName }),
+        guard let tool = Sound.tools.first(where: { $0.name == toolName }),
               case .object(let schema) = tool.inputSchema,
               case .array(let required) = schema["required"] else {
             return []
@@ -595,7 +595,7 @@ struct SchemaParameterConsistencyTests {
 
     @Test("Required parameters are a subset of defined properties")
     func requiredAreSubsetOfProperties() {
-        for tool in Stem.tools {
+        for tool in Sound.tools {
             let props = propertyNames(for: tool.name)
             let required = requiredNames(for: tool.name)
             let missing = required.subtracting(props)
@@ -792,7 +792,7 @@ struct ToolResultConstructionTests {
 
 // NOTE: The tests below require MusicKit authorization and an active Apple Music subscription.
 // They will fail in CI environments or on machines without Music.app access.
-// To run these locally: `stem setup` first, then `swift test --filter MusicKitDependentTests`
+// To run these locally: `sound setup` first, then `swift test --filter MusicKitDependentTests`
 //
 // These are commented out intentionally — uncomment to run locally with MusicKit auth.
 //

@@ -1,11 +1,11 @@
 import MCP
 
-/// Stem server metadata
-public enum Stem {
-    public static let serverName = "stem"
-    public static let serverVersion = "0.1.1"
+/// Sound server metadata
+public enum Sound {
+    public static let serverName = "sound"
+    public static let serverVersion = "1.0.0"
 
-    /// All tool definitions for the Stem MCP server.
+    /// All tool definitions for the Sound MCP server.
     /// Separated from the executable so they can be tested independently.
     public static let tools: [Tool] = [
         Tool(
@@ -196,7 +196,7 @@ public enum Stem {
         ),
         Tool(
             name: "ping",
-            description: "Check if Stem is running and Apple Music is authorized",
+            description: "Check if Sound is running and Apple Music is authorized",
             inputSchema: .object([
                 "type": .string("object"),
                 "properties": .object([:])
@@ -209,6 +209,6 @@ public enum Stem {
 
     /// The ping response text, including the current version
     public static var pingResponse: String {
-        "Stem v\(serverVersion) is running. Apple Music is authorized."
+        "Sound v\(serverVersion) is running. Apple Music is authorized."
     }
 }
